@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const App = () => {
   const [title, setTitle] = useState("");
   const [details, setDetails] = useState("");
-  const [task, setTask] = useState([]);
+  const [task, setTask] =  useState(() => {
+  const saved = localStorage.getItem("notes");
+  return saved ? JSON.parse(saved) : [];
+});
 
   const submitHandler = (e) => {
     e.preventDefault();
+
+    if (!title.trim() || !details.trim()) return;
 
     const copyTask = [...task];
     copyTask.push({ title, details });
@@ -21,6 +26,11 @@ const App = () => {
     deleteTask.splice(idx, 1);
     setTask(deleteTask);
   };
+
+  useEffect(() => {
+  localStorage.setItem("notes", JSON.stringify(task));
+}, [task]);
+
 
   return (
     <div
@@ -59,16 +69,15 @@ const App = () => {
         <div className="flex flex-wrap items-start justify-start gap-4 mt-4 h-[90%] overflow-auto">
           {task.map((item, idx) => {
             return (
-              <>
                 <div
                   key={idx}
                   className="flex justify-between flex-col items-start h-50 w-40 bg-cover rounded-xl bg-[url('https://static.vecteezy.com/system/resources/previews/037/152/677/non_2x/sticky-note-paper-background-free-png.png')] text-black pt-6 pb-2 px-4"
                 >
-                  <div>
-                    <h3 className="leading-tight font-bold text-lg">
+                  <div className="overflow-auto max-h-36">
+                    <h3 className="leading-tight font-bold text-lg wrap-break-word">
                       {item.title}
                     </h3>
-                    <p className="mt-2 text-sm text-gray-500 leading-tight">
+                    <p className="mt-2 text-sm text-gray-500 leading-tight wrap-break-word">
                       {item.details}
                     </p>
                   </div>
@@ -81,7 +90,6 @@ const App = () => {
                     Delete
                   </button>
                 </div>
-              </>
             );
           })}
         </div>
